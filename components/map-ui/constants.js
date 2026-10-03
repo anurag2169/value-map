@@ -13,6 +13,19 @@ const createMarkerIcon = (color) =>
     popupAnchor: [0, -20],
   });
 
+export const SEARCH_RESULT_ICON = L.divIcon({
+  className: "",
+  html: `
+    <div style="position:relative;width:22px;height:22px;display:flex;align-items:center;justify-content:center;">
+      <div style="position:absolute;width:22px;height:22px;border:3px solid rgba(59,130,246,0.9);background:rgba(191,219,254,0.45);border-radius:9999px;box-shadow:0 0 0 2px rgba(255,255,255,0.9);"></div>
+      <div style="position:relative;width:8px;height:8px;border-radius:9999px;background:#2563eb;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35);"></div>
+    </div>
+  `,
+  iconSize: [22, 22],
+  iconAnchor: [11, 11],
+  popupAnchor: [0, -11],
+});
+
 export const RATE_ICONS = {
   low: createMarkerIcon("#2563eb"),
   medium: createMarkerIcon("#16a34a"),

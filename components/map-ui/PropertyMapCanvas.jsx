@@ -1,8 +1,8 @@
 "use client";
 
-import { MapContainer, TileLayer } from "react-leaflet";
+import { Circle, MapContainer, Marker, TileLayer } from "react-leaflet";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { RATLAM_CENTER, DEFAULT_MAP_ZOOM } from "./constants";
+import { RATLAM_CENTER, DEFAULT_MAP_ZOOM, SEARCH_RESULT_ICON } from "./constants";
 import { RecenterButton, SearchMapController } from "./MapControls";
 import PropertyMarker from "./PropertyMarker";
 import MapLegend from "./MapLegend";
@@ -16,6 +16,9 @@ export default function PropertyMapCanvas({
   deletingId,
   loading,
 }) {
+  const searchCoordinates = mapTarget?.coordinates;
+  const searchRadius = mapTarget?.radius ?? 200;
+
   return (
     <Card className="overflow-hidden">
       <CardHeader>
@@ -40,6 +43,22 @@ export default function PropertyMapCanvas({
             />
             <RecenterButton />
             <SearchMapController mapTarget={mapTarget} mapResetKey={mapResetKey} />
+
+            {searchCoordinates && (
+              <>
+                <Circle
+                  center={searchCoordinates}
+                  radius={searchRadius}
+                  pathOptions={{
+                    color: "#2563eb",
+                    fillColor: "#93c5fd",
+                    fillOpacity: 0.2,
+                    weight: 2,
+                  }}
+                />
+                <Marker position={searchCoordinates} icon={SEARCH_RESULT_ICON} />
+              </>
+            )}
 
             {locations.map((location) => (
               <PropertyMarker

@@ -206,12 +206,12 @@ export default function useValueMap() {
     }
   }, []);
 
-  const searchCoordinates = useCallback((coordinates) => {
-    setMapTarget({ coordinates, key: Date.now() });
+  const searchCoordinates = useCallback((coordinates, radius = 500) => {
+    setMapTarget({ coordinates, radius: Math.max(100, Number(radius) || 500), key: Date.now() });
   }, []);
 
-  const searchLocation = useCallback((coordinates) => {
-    setMapTarget({ coordinates, key: Date.now() });
+  const searchLocation = useCallback((coordinates, radius = 500) => {
+    setMapTarget({ coordinates, radius: Math.max(100, Number(radius) || 500), key: Date.now() });
   }, []);
 
   const clearSearch = useCallback(() => {

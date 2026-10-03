@@ -27,6 +27,7 @@ export default function MapSearch({
   onClear,
 }) {
   const [query, setQuery] = useState("");
+  const [radius, setRadius] = useState("500");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -36,11 +37,12 @@ export default function MapSearch({
     const searchValue = query.trim();
     if (!searchValue) return;
 
+    const normalizedRadius = Math.max(100, Number(radius) || 500);
     const coordinates = parseCoordinates(searchValue);
     if (coordinates) {
       setResults([]);
       setSearched(true);
-      onSearchCoordinates(coordinates);
+      onSearchCoordinates(coordinates, normalizedRadius);
       return;
     }
 
@@ -81,44 +83,72 @@ export default function MapSearch({
   };
 
   const selectResult = (location) => {
+    const selectedRadius = Math.max(100, Number(radius) || 500);
     setQuery(location.name);
     setResults([]);
     setSearched(false);
-    onSearchLocation([location.lat, location.lng]);
+    onSearchLocation([location.lat, location.lng], selectedRadius);
   };
 
   const clearSearch = () => {
     setQuery("");
     setResults([]);
     setSearched(false);
+    setRadius("500");
     onClear();
   };
 
   return (
     <form onSubmit={handleSearch} className="w-full">
-      <div className="relative">
-        <Input
-          value={query}
-          onChange={(event) => {
-            const value = event.target.value;
-            setQuery(value);
-            setResults([]);
-            setSearched(false);
-            if (!value.trim()) onClear();
-          }}
-          placeholder="Search location or coordinates..."
-          className="pr-10"
-        />
-        {query && (
-          <button
-            type="button"
-            onClick={clearSearch}
-            aria-label="Clear location search"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-900"
-          >
-            ×
-          </button>
-        )}
+      <div className="flex flex-col items-stretch gap-3 md:flex-row md:items-center">
+        <div className="relative flex-1">
+          <Input
+            value={query}
+            onChange={(event) => {
+              const value = event.target.value;
+              setQuery(value);
+              setResults([]);
+              setSearched(false);
+              if (!value.trim()) onClear();
+            }}
+            placeholder="Search location or coordinates..."
+            className="pr-10"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              aria-label="Clear location search"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-900"
+            >
+              ×
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <label htmlFor="search-radius" className="whitespace-nowrap text-xs font-medium text-muted-foreground">
+            Radius (m)
+          </label>
+          <Input
+            id="search-radius"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            min="100"
+            step="100"
+            value={radius}
+            onChange={(event) => setRadius(event.target.value)}
+            className="w-24"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="inline-flex h-9 shrink-0 items-center justify-center rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground transition hover:bg-primary/90"
+        >
+          Search
+        </button>
       </div>
 
       {loading && (
