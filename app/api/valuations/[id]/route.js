@@ -3,8 +3,10 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { valuations } from "@/lib/db/schema";
+import { auth } from "@clerk/nextjs/server";
 
 export async function DELETE(request, { params }) {
+  await auth.protect();
   try {
     const { id } = await params;
     const valuationId = Number(id);

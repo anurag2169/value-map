@@ -7,8 +7,10 @@ import {
     properties,
     valuations,
 } from "@/lib/db/schema";
+import { auth } from "@clerk/nextjs/server";
 
 export async function GET() {
+  await auth.protect();
     try {
         const result = await db
             .select({
@@ -51,6 +53,7 @@ export async function GET() {
 }
 
 export async function POST(request) {
+  await auth.protect();
   try {
     const body = await request.json();
 

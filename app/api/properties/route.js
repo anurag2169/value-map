@@ -5,8 +5,10 @@ import {
   properties,
   valuations,
 } from "@/lib/db/schema";
+import { auth } from "@clerk/nextjs/server";
 
 export async function GET() {
+  await auth.protect();
   try {
     const result = await db.execute(`
       SELECT
