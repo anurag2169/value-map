@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import {
   Dialog,
   DialogContent,
@@ -7,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export default function PropertyHistoryDialog({
   property,
@@ -14,7 +17,9 @@ export default function PropertyHistoryDialog({
   onOpenChange,
   loading,
   error,
+  onDeleteValuation,
 }) {
+  const [deletingValuationId, setDeletingValuationId] = useState(null);
   const valuations = property?.valuations || [];
   const latestValuation = valuations.length
     ? [...valuations].sort((a, b) => {
@@ -22,6 +27,24 @@ export default function PropertyHistoryDialog({
         return dateCompare || Number(b.id) - Number(a.id);
       })[0]
     : null;
+
+  const handleDeleteValuation = async (valuation) => {
+    if (!onDeleteValuation || !property?.property?.id) return;
+
+    const confirmed = window.confirm(
+      `Delete this valuation for ${property.property.name} on ${valuation.valuationDate}? This action is permanent.`
+    );
+
+    if (!confirmed) return;
+
+    setDeletingValuationId(valuation.id);
+
+    try {
+      await onDeleteValuation(valuation.id, property.property.id);
+    } finally {
+      setDeletingValuationId(null);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -64,12 +87,26 @@ export default function PropertyHistoryDialog({
                         return dateCompare || Number(b.id) - Number(a.id);
                       })
                       .map((valuation) => (
-                        <div key={valuation.id} className="flex items-center justify-between rounded-lg border p-3">
-                          <div>
-                            <div className="text-sm font-medium">{valuation.valuationDate}</div>
-                            <div className="text-xs text-muted-foreground">Valuation date</div>
+                        <div
+                          key={valuation.id}
+                          className="rounded-lg border p-3"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <div className="text-sm font-medium">{valuation.valuationDate}</div>
+                              <div className="text-xs text-muted-foreground">Valuation date</div>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              disabled={deletingValuationId === valuation.id}
+                              onClick={() => handleDeleteValuation(valuation)}
+                            >
+                              {deletingValuationId === valuation.id ? "Deleting..." : "Delete"}
+                            </Button>
                           </div>
-                          <div className="text-right">
+                          <div className="mt-3 text-right">
                             <div className="font-semibold">₹{Number(valuation.rate).toLocaleString("en-IN")}</div>
                             <div className="text-xs text-muted-foreground">/ sq.ft</div>
                           </div>

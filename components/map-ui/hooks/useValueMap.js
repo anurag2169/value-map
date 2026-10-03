@@ -2,10 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { getCurrentDateValue, resolveDateInput } from "@/lib/date.js";
+
 const EMPTY_FORM = {
   name: "",
   coordinates: "",
   rate: "",
+  date: getCurrentDateValue(),
 };
 
 function formatLocation(location) {
@@ -55,6 +58,7 @@ export default function useValueMap() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchLocations().catch(() => {
       // The error is logged in fetchLocations; the UI stops loading.
     });
@@ -86,8 +90,15 @@ export default function useValueMap() {
     }
 
     const rate = Number(formData.rate);
+    const valuationDate = resolveDateInput(formData.date);
+
     if (!formData.name.trim() || !formData.rate || !Number.isFinite(rate) || rate < 0) {
       alert("Please enter a location name and a valid rate.");
+      return;
+    }
+
+    if (!valuationDate) {
+      alert("Please select a valid valuation date.");
       return;
     }
 
@@ -102,7 +113,7 @@ export default function useValueMap() {
           latitude: lat,
           longitude: lng,
           rate,
-          valuationDate: new Date().toISOString().slice(0, 10),
+          valuationDate,
         }),
       });
 
@@ -166,6 +177,27 @@ export default function useValueMap() {
     }
   }, []);
 
+  const deleteValuation = useCallback(async (valuationId, propertyId) => {
+    if (!propertyId || !valuationId) return;
+
+    try {
+      const response = await fetch(`/api/valuations/${valuationId}`, {
+        method: "DELETE",
+      });
+      const result = await response.json();
+
+      if (!response.ok || result.success === false) {
+        throw new Error(result.message || "Failed to delete valuation");
+      }
+
+      await fetchLocations({ showLoading: false });
+      await viewHistory(propertyId);
+    } catch (error) {
+      console.error("Failed to delete valuation:", error);
+      alert(error.message || "Failed to delete valuation. Please try again.");
+    }
+  }, [fetchLocations, viewHistory]);
+
   const closeHistory = useCallback((open) => {
     setHistoryOpen(open);
     if (!open) {
@@ -207,6 +239,7 @@ export default function useValueMap() {
     historyLoading,
     historyError,
     viewHistory,
+    deleteValuation,
     closeHistory,
   };
 }

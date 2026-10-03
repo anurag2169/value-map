@@ -63,6 +63,7 @@ export default function ValueMap() {
           onOpenChange={mapState.closeHistory}
           loading={mapState.historyLoading}
           error={mapState.historyError}
+          onDeleteValuation={mapState.deleteValuation}
         />
       </div>
     </div>

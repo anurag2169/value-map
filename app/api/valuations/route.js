@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { eq, and } from "drizzle-orm";
 
 import { db } from "@/lib/db";
+import { resolveDateInput } from "@/lib/date.js";
 import {
     properties,
     valuations,
@@ -61,13 +62,15 @@ export async function POST(request) {
       valuationDate,
     } = body;
 
+    const normalizedDate = resolveDateInput(valuationDate);
+
     // Validate required fields
     if (
       !name ||
       latitude === undefined ||
       longitude === undefined ||
       rate === undefined ||
-      !valuationDate
+      !normalizedDate
     ) {
       return NextResponse.json(
         {
@@ -139,7 +142,7 @@ export async function POST(request) {
       .values({
         propertyId: property.id,
         rate: Number(rate),
-        valuationDate,
+        valuationDate: normalizedDate,
       })
       .returning();
 
